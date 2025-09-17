@@ -2,10 +2,17 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Admin\AgentController;
+use App\Http\Controllers\Admin\AmenityController;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\CommentController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\LocationController;
 use App\Http\Controllers\Admin\MediaController;
 use App\Http\Controllers\Admin\PostController;
+use App\Http\Controllers\Admin\PropertyController;
+use App\Http\Controllers\Admin\PropertyTypeController;
+use App\Http\Controllers\Admin\SeoSettingController;
 use App\Http\Controllers\Admin\TagController;
 use App\Http\Controllers\Admin\TeamController;
 use App\Http\Controllers\Admin\UserController;
@@ -49,11 +56,13 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // Blog Management - Tags
     Route::middleware('permission:view tags')->group(function () {
         Route::get('tags', [TagController::class, 'index'])->name('tags.index');
-        Route::get('tags/{tag}', [TagController::class, 'show'])->name('tags.show');
     });
     Route::middleware('permission:create tags')->group(function () {
         Route::get('tags/create', [TagController::class, 'create'])->name('tags.create');
         Route::post('tags', [TagController::class, 'store'])->name('tags.store');
+    });
+    Route::middleware('permission:view tags')->group(function () {
+        Route::get('tags/{tag}', [TagController::class, 'show'])->name('tags.show');
     });
     Route::middleware('permission:edit tags')->group(function () {
         Route::get('tags/{tag}/edit', [TagController::class, 'edit'])->name('tags.edit');
@@ -82,6 +91,22 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::delete('media/{media}', [MediaController::class, 'destroy'])->name('media.destroy');
     });
 
+    // Blog Management - Comments
+    Route::middleware('permission:view comments')->group(function () {
+        Route::get('comments', [CommentController::class, 'index'])->name('comments.index');
+        Route::get('comments/{comment}', [CommentController::class, 'show'])->name('comments.show');
+    });
+    Route::middleware('permission:edit comments')->group(function () {
+        Route::get('comments/{comment}/edit', [CommentController::class, 'edit'])->name('comments.edit');
+        Route::put('comments/{comment}', [CommentController::class, 'update'])->name('comments.update');
+        Route::patch('comments/{comment}', [CommentController::class, 'update']);
+        Route::patch('comments/{comment}/approve', [CommentController::class, 'approve'])->name('comments.approve');
+        Route::patch('comments/{comment}/reject', [CommentController::class, 'reject'])->name('comments.reject');
+    });
+    Route::middleware('permission:delete comments')->group(function () {
+        Route::delete('comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
+    });
+
     Route::middleware('permission:create posts')->group(function () {
         Route::get('posts/create', [PostController::class, 'create'])->name('posts.create');
         Route::post('posts', [PostController::class, 'store'])->name('posts.store');
@@ -104,5 +129,31 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::middleware('permission:publish posts')->group(function () {
         Route::patch('posts/{post}/publish', [PostController::class, 'publish'])->name('posts.publish');
         Route::patch('posts/{post}/unpublish', [PostController::class, 'unpublish'])->name('posts.unpublish');
+    });
+
+    // SEO Management
+    Route::middleware('permission:manage seo')->group(function () {
+        Route::get('seo-settings', [SeoSettingController::class, 'index'])->name('seo-settings.index');
+        Route::get('seo-settings/create', [SeoSettingController::class, 'create'])->name('seo-settings.create');
+        Route::post('seo-settings', [SeoSettingController::class, 'store'])->name('seo-settings.store');
+        Route::get('seo-settings/{seoSetting}', [SeoSettingController::class, 'show'])->name('seo-settings.show');
+        Route::get('seo-settings/{seoSetting}/edit', [SeoSettingController::class, 'edit'])->name('seo-settings.edit');
+        Route::put('seo-settings/{seoSetting}', [SeoSettingController::class, 'update'])->name('seo-settings.update');
+        Route::patch('seo-settings/{seoSetting}', [SeoSettingController::class, 'update']);
+        Route::delete('seo-settings/{seoSetting}', [SeoSettingController::class, 'destroy'])->name('seo-settings.destroy');
+    });
+
+    // Property Management Routes
+    Route::delete('properties/bulk-destroy', [PropertyController::class, 'bulkDestroy'])->name('properties.bulk-destroy');
+    Route::resource('properties', PropertyController::class);
+    Route::resource('property-types', PropertyTypeController::class);
+    Route::resource('locations', LocationController::class);
+    Route::resource('agents', AgentController::class);
+    Route::resource('amenities', AmenityController::class);
+
+    // Property-specific routes
+    Route::middleware('permission:manage property images')->group(function () {
+        Route::post('properties/{property}/images', [PropertyController::class, 'uploadImages'])->name('properties.images.upload');
+        Route::delete('properties/{property}/images/{image}', [PropertyController::class, 'deleteImage'])->name('properties.images.delete');
     });
 });
