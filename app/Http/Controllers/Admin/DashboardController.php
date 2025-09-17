@@ -5,6 +5,10 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Agent;
+use App\Models\Amenity;
+use App\Models\Location;
+use App\Models\Property;
 use App\Models\Team;
 use App\Models\User;
 use App\Services\AnalyticsService;
@@ -26,6 +30,24 @@ class DashboardController extends Controller
         $contentDistribution = $this->analyticsService->getContentDistribution();
         $recentActivity = $this->analyticsService->getRecentActivity(10);
         $topContent = $this->analyticsService->getTopPerformingContent();
+
+        // Property management statistics
+        $totalProperties = Property::count();
+        $propertyStats = [
+            'total_properties' => $totalProperties,
+            'available_properties' => Property::where('status', 'available')->count(),
+            'sold_properties' => Property::where('status', 'sold')->count(),
+            'rented_properties' => Property::where('status', 'rented')->count(),
+            'properties_this_month' => Property::whereMonth('created_at', now()->month)
+                ->whereYear('created_at', now()->year)
+                ->count(),
+            'featured_properties' => Property::where('is_featured', true)->count(),
+            'total_value' => Property::sum('price'),
+            'average_price' => $totalProperties > 0 ? Property::avg('price') : 0,
+            'total_agents' => Agent::count(),
+            'total_locations' => Location::count(),
+            'total_amenities' => Amenity::count(),
+        ];
 
         // Legacy team/user stats (keeping for backward compatibility)
         $legacyStats = [
@@ -49,6 +71,11 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
 
+        $recent_properties = Property::with(['agent', 'location', 'propertyType'])
+            ->latest()
+            ->limit(5)
+            ->get();
+
         return Inertia::render('Admin/Dashboard', [
             // Blog analytics
             'blog_stats' => $blogStats,
@@ -57,6 +84,10 @@ class DashboardController extends Controller
             'content_distribution' => $contentDistribution,
             'recent_activity' => $recentActivity,
             'top_performing_content' => $topContent,
+
+            // Property management
+            'propertyStats' => $propertyStats,
+            'recent_properties' => $recent_properties,
 
             // Legacy data
             'stats' => $legacyStats,

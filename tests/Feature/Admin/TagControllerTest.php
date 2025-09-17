@@ -4,11 +4,29 @@ declare(strict_types=1);
 
 use App\Models\Tag;
 use App\Models\User;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
 beforeEach(function () {
     // Create admin role and user for authentication
-    Role::create(['name' => 'admin']);
+    $adminRole = Role::firstOrCreate(['name' => 'admin']);
+
+    // Create required permissions
+    $permissions = [
+        'access admin panel',
+        'view tags',
+        'create tags',
+        'edit tags',
+        'delete tags',
+    ];
+
+    foreach ($permissions as $permission) {
+        Permission::firstOrCreate(['name' => $permission]);
+    }
+
+    // Give admin all permissions
+    $adminRole->syncPermissions($permissions);
+
     $this->admin = User::factory()->create();
     $this->admin->assignRole('admin');
 });

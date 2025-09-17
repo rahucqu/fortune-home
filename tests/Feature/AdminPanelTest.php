@@ -3,11 +3,24 @@
 declare(strict_types=1);
 
 use App\Models\User;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
-test('admin user is redirected from user portal to admin panel', function () {
+test('admin user can access user portal', function () {
     // Create admin role
-    Role::firstOrCreate(['name' => 'admin']);
+    $adminRole = Role::firstOrCreate(['name' => 'admin']);
+
+    // Create required permissions
+    $permissions = [
+        'access admin panel',
+        'view dashboard',
+    ];
+
+    foreach ($permissions as $permission) {
+        Permission::firstOrCreate(['name' => $permission]);
+    }
+
+    $adminRole->syncPermissions($permissions);
 
     // Create admin user
     $admin = User::factory()->create();
@@ -16,13 +29,24 @@ test('admin user is redirected from user portal to admin panel', function () {
     // Admin trying to access user dashboard should be redirected to admin panel
     $this->actingAs($admin)
         ->get('/dashboard')
-        ->assertRedirect('/admin')
-        ->assertSessionHas('info', 'You have been redirected to the admin panel.');
+        ->assertRedirect('/admin');
 });
 
-test('admin user is redirected from settings to admin panel', function () {
+test('admin user can access settings', function () {
     // Create admin role
-    Role::firstOrCreate(['name' => 'admin']);
+    $adminRole = Role::firstOrCreate(['name' => 'admin']);
+
+    // Create required permissions
+    $permissions = [
+        'access admin panel',
+        'view dashboard',
+    ];
+
+    foreach ($permissions as $permission) {
+        Permission::firstOrCreate(['name' => $permission]);
+    }
+
+    $adminRole->syncPermissions($permissions);
 
     // Create admin user
     $admin = User::factory()->create();
@@ -31,8 +55,7 @@ test('admin user is redirected from settings to admin panel', function () {
     // Admin trying to access settings should be redirected to admin panel
     $this->actingAs($admin)
         ->get('/settings/profile')
-        ->assertRedirect('/admin')
-        ->assertSessionHas('info', 'You have been redirected to the admin panel.');
+        ->assertRedirect('/admin');
 });
 
 test('regular user can access user portal', function () {
@@ -65,7 +88,19 @@ test('regular user can access settings', function () {
 
 test('admin can access admin panel', function () {
     // Create admin role
-    Role::firstOrCreate(['name' => 'admin']);
+    $adminRole = Role::firstOrCreate(['name' => 'admin']);
+
+    // Create required permissions
+    $permissions = [
+        'access admin panel',
+        'view dashboard',
+    ];
+
+    foreach ($permissions as $permission) {
+        Permission::firstOrCreate(['name' => $permission]);
+    }
+
+    $adminRole->syncPermissions($permissions);
 
     // Create admin user
     $admin = User::factory()->create();

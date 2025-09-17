@@ -13,7 +13,7 @@
                 "/Applications/Herd.app/Contents/Resources/herd-mcp.phar"
             ],
             "env": {
-                "SITE_PATH": "/Users/Iqbal/Projects/laravel-stater-kit"
+                "SITE_PATH": "/Users/Iqbal/Projects/fortune-home"
             }
         }
     }
