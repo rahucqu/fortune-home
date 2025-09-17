@@ -9,6 +9,8 @@ interface AdminLayoutProps {
 
 export default ({ children, breadcrumbs, ...props }: AdminLayoutProps) => (
     <AdminSidebarLayout breadcrumbs={breadcrumbs} {...props}>
-        {children}
+        <div className='mx-6'>
+            {children}
+        </div>
     </AdminSidebarLayout>
 );
