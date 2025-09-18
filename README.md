@@ -28,7 +28,23 @@ Built with **Laravel 12**, **Inertia.js**, **React**, **TailwindCSS**, and **sha
 - **Authentication:** Laravel Jetstream 
 
 ---
+## 🛠 Tech Stack
 
+fortune-home/
+├── app/            # Laravel backend (controllers, models, services)
+├── bootstrap/
+├── config/
+├── database/       # Migrations & seeders
+├── public/
+├── resources/
+│   ├── js/         # React components (Inertia pages)
+│   ├── css/        # Tailwind styles
+│   └── views/      # Blade templates (if needed)
+├── routes/         # Laravel routes (web.php, api.php)
+├── tests/
+└── package.json
+
+---
 ## 🚀 Installation
 
 ### Prerequisites
