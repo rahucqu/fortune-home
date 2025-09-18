@@ -10,25 +10,25 @@ The frontend is built using **Inertia.js**, **React**, **TailwindCSS**, and **sh
 ```bash
 fortune-homes/
 ├── resources/
-│ ├── js/
-│ │ ├── Pages/ # Inertia React pages (Homepage, Search, Property Details, Admin)
-│ │ ├── Components/ # Shared React components (Navbar, Footer, Filters, PropertyCard)
-│ │ ├── Layouts/ # Layout wrappers for consistent UI
-│ │ └── app.jsx # React entry point
-│ │
-│ ├── css/
-│ │ └── app.css # TailwindCSS styles
-│ │
-│ └── views/ # Blade templates (minimal, used as Inertia entry points)
+│   ├── js/
+│   │   ├── Pages/        # Inertia React pages (Homepage, Search, Property Details, Admin)
+│   │   ├── Components/   # Shared React components (Navbar, Footer, Filters, PropertyCard)
+│   │   ├── Layouts/      # Layout wrappers for consistent UI
+│   │   └── app.jsx       # React entry point
+│   │
+│   ├── css/
+│   │   └── app.css       # TailwindCSS styles
+│   │
+│   └── views/            # Blade templates (minimal, used as Inertia entry points)
 │
 ├── routes/
-│ └── web.php # Laravel routes powering Inertia React pages
+│   └── web.php           # Laravel routes powering Inertia React pages
 │
-├── tailwind.config.js # TailwindCSS configuration
-├── postcss.config.js # PostCSS config
-└── package.json # Frontend dependencies
-
+├── tailwind.config.js    # TailwindCSS configuration
+├── postcss.config.js     # PostCSS config
+└── package.json          # Frontend dependencies
 ```
+
 ---
 
 ## 🛠 Tech Stack (Frontend)
@@ -45,73 +45,68 @@ fortune-homes/
 
 ### Install Dependencies
 ```bash
-# Install frontend packages
 npm install
-Run Development Server
-bash
-Copy code
+```
+
+### Run Development Server
+```bash
 # Compile assets with Vite
 npm run dev
-Build for Production
-bash
-Copy code
+```
+
+### Build for Production
+```bash
 npm run build
+```
 
-📋 Front-End Tasks Completed
-Converted UI/UX mockups into responsive React pages:
+---
 
-resources/js/Pages/Home.jsx
+## 📋 Front-End Tasks Completed
 
-resources/js/Pages/Search.jsx
+### React Pages
+- `resources/js/Pages/Home.jsx` – homepage with featured listings.  
+- `resources/js/Pages/Search.jsx` – property search & filtering.  
+- `resources/js/Pages/PropertyDetails.jsx` – detailed property info with maps.  
+- `resources/js/Pages/Admin/Dashboard.jsx` – admin panel for listings.  
 
-resources/js/Pages/PropertyDetails.jsx
+### Shared Components
+- `resources/js/Components/Navbar.jsx` – navigation bar.  
+- `resources/js/Components/Footer.jsx` – footer section.  
+- `resources/js/Components/PropertyCard.jsx` – reusable property card UI.  
+- `resources/js/Components/Filters.jsx` – filtering sidebar and controls.  
 
-resources/js/Pages/Admin/Dashboard.jsx
+### Other Completed Work
+- Implemented **search & filtering** with React state + Inertia requests.  
+- Integrated **Google Maps API** for property location display.  
+- Ensured **mobile responsiveness** with Tailwind breakpoints.  
+- Added **form validation UI** for inquiries and admin forms.  
+- Optimized performance (lazy loading images, minified assets).  
+- Conducted **cross-browser testing** (Chrome, Firefox, Safari, Edge).  
 
-Built shared components:
+---
 
-resources/js/Components/Navbar.jsx
+## 🔄 Collaboration Notes
 
-resources/js/Components/Footer.jsx
+- Worked closely with **Parthesh (UI/UX Designer)** to translate Figma mockups into code.  
+- Integrated **Inertia.js routes** with backend APIs provided by **Rahul (Back-End Developer & Tester)**.  
+- Code reviewed via GitHub Pull Requests on [fortune-homes](https://github.com/rahucqu/fortune-homes).  
+- Coordinated with **Abhay (Project Manager)** for task tracking on ClickUp.  
 
-resources/js/Components/PropertyCard.jsx
+---
 
-resources/js/Components/Filters.jsx
+## 📚 References
 
-Implemented search & filtering with React state + Inertia requests.
+- [Laravel + Inertia Documentation](https://inertiajs.com/)  
+- [TailwindCSS Docs](https://tailwindcss.com/docs)  
+- [shadcn/ui Components](https://ui.shadcn.com/docs)  
+- [Google Maps JavaScript API](https://developers.google.com/maps/documentation/javascript)  
 
-Integrated Google Maps API for property location display.
+---
 
-Ensured mobile responsiveness with Tailwind breakpoints.
+## 👤 Developer
 
-Added form validation UI for inquiries and admin forms.
+- **Name:** Harsh Adhiyol  
+- **Role:** Front-End Developer  
+- **Focus:** Building responsive React-based UI with Inertia and Tailwind.  
 
-Optimized performance (lazy loading images, minified assets).
-
-Conducted cross-browser testing (Chrome, Firefox, Safari, Edge).
-
-🔄 Collaboration Notes
-Worked closely with Parthesh (UI/UX) to translate Figma mockups into code.
-
-Integrated Inertia.js routes with backend APIs provided by Rahul.
-
-Code reviewed via GitHub Pull Requests on fortune-homes.
-
-Coordinated with Abhay (Project Manager) for task tracking on ClickUp.
-
-📚 References
-Laravel + Inertia Documentation
-
-TailwindCSS Docs
-
-shadcn/ui Components
-
-Google Maps JavaScript API
-
-👤 Developer
-Name: Harsh Adhiyol
-
-Role: Front-End Developer
-
-Focus: Building responsive React-based UI with Inertia and Tailwind.
-
+---
