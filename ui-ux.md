@@ -1,8 +1,9 @@
 # 🎨 Fortune Home – UI/UX Design Documentation
 
-This document describes the design work carried out for the **Fortune Home Real Estate Website** by the **UI/UX Designer (Parthesh)**.  
+This document describes the design work carried out for the **Fortune Home Real Estate Website** by the **UI/UX Designer**.  
 The focus is on creating an intuitive, modern, and accessible user interface that aligns with the project’s branding and usability goals.
 
+Figma Link: https://www.figma.com/design/3l7mCp3oi777uCoC2jw5m0/fortune-homes?node-id=0-1&p=f&t=dxVscGo33hSVbT1n-0
 ---
 
 ## 🎯 Objectives
