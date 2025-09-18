@@ -95,7 +95,7 @@ Figma Link: https://www.figma.com/design/3l7mCp3oi777uCoC2jw5m0/fortune-homes?no
 
 ## 📷 Screenshots & Placeholders
 
-*(Add exported images from Figma here once available, e.g., `screens/homepage.png`, `screens/search.png`, etc.)*
+
 
 ---
 
