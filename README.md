@@ -51,7 +51,7 @@ fortune-home/
 - PHP 8.2+
 - Composer
 - Node.js 18+
-- MySQL or MariaDB
+- MySQL
 - Git
 
 ### Steps
