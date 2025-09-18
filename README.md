@@ -29,7 +29,7 @@ Built with **Laravel 12**, **Inertia.js**, **React**, **TailwindCSS**, and **sha
 
 ---
 ## 🛠 Tech Stack
-
+```bash
 fortune-home/
 ├── app/            # Laravel backend (controllers, models, services)
 ├── bootstrap/
@@ -43,7 +43,7 @@ fortune-home/
 ├── routes/         # Laravel routes (web.php, api.php)
 ├── tests/
 └── package.json
-
+```
 ---
 ## 🚀 Installation
 
