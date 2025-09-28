@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Property;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -14,27 +15,54 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // 1. Foundation - Roles, Permissions, and Core Settings
         $this->call([
-            // Role and permission setup
             RolePermissionSeeder::class,
-
-
-            // Property-related seeders (must be in this order due to relationships)
-            PropertyTypeSeeder::class,
-            LocationSeeder::class,
-            AgentSeeder::class,
-            AmenitySeeder::class,
-            PropertySeeder::class,
-
-            // Admin and user setup
-            AdminUserSeeder::class,
-            CreatePersonalTeamsSeeder::class,
-
-            // SEO settings
-            SeoSettingsSeeder::class,
+            SettingSeeder::class,
         ]);
 
-        // Create additional test users if needed
-        // User::factory(10)->create();
+        $this->call([
+            UserSeeder::class,
+        ]);
+
+        $this->call([
+            PropertyTypeSeeder::class,
+            FeatureSeeder::class,
+            LocationSeeder::class,
+            AmenitySeeder::class,
+        ]);
+
+        // 4. Core Property Data
+        $this->call([
+            PropertySeeder::class,
+            PropertyImageSeeder::class,
+            PropertyFloorPlanSeeder::class,
+        ]);
+
+        // 5. Property Interactions
+        $this->call([
+            PropertyInquirySeeder::class,
+            PropertyFavoriteSeeder::class,
+            SavedSearchSeeder::class,
+        ]);
+
+        // 6. Blog System
+        $this->call([
+            BlogCategorySeeder::class,
+            BlogPostSeeder::class,
+            BlogTagSeeder::class,
+        ]);
+
+        // 7. Communication and Analytics
+        $this->call([
+            ContactInquirySeeder::class,
+            PropertyViewSeeder::class,
+        ]);
+
+        // 8. SEO and Marketing
+        $this->call([
+            SeoMetaSeeder::class,
+        ]);
+
     }
 }
