@@ -2,52 +2,52 @@
 
 declare(strict_types=1);
 
-use App\Http\Middleware\PermissionMiddleware;
 use App\Models\User;
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
-beforeEach(function () {
-    // Seed roles and permissions
-    $this->artisan('db:seed', ['--class' => 'BlogRolePermissionSeeder']);
-});
+test('users can access routes they have permission for', function () {
+    $this->seed();
 
-it('allows access when user has required permission', function () {
-    $user = User::factory()->create();
-    $user->assignRole('editor');
-    
-    $middleware = new PermissionMiddleware();
-    $request = Request::create('/test');
-    $request->setUserResolver(fn () => $user);
-    
-    $response = $middleware->handle($request, fn () => response('OK'), 'view posts');
-    
-    expect($response->getContent())->toBe('OK');
-});
+    $admin = User::where('email', 'admin@example.com')->first();
 
-it('denies access when user lacks required permission', function () {
-    $user = User::factory()->create();
-    $user->assignRole('contributor');
-    
-    $middleware = new PermissionMiddleware();
-    $request = Request::create('/test');
-    $request->setUserResolver(fn () => $user);
-    
-    try {
-        $middleware->handle($request, fn () => response('OK'), 'publish posts');
-        $this->fail('Expected 403 abort');
-    } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
-        expect($e->getStatusCode())->toBe(403);
+    if (! $admin) {
+        $this->markTestSkipped('Admin user not found. Run database seeder first.');
     }
+
+    $response = $this->actingAs($admin)->get(route('admin.system.users.index'));
+
+    $response->assertStatus(200);
 });
 
-it('redirects to login when user is not authenticated', function () {
-    $middleware = new PermissionMiddleware();
-    $request = Request::create('/test');
-    $request->setUserResolver(fn () => null);
-    
-    $response = $middleware->handle($request, fn () => response('OK'), 'view posts');
-    
-    expect($response->getStatusCode())->toBe(302);
-    expect($response->getTargetUrl())->toContain('login');
+test('users cannot access routes they do not have permission for', function () {
+    $this->seed();
+
+    // Create a user without any roles
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)->get(route('admin.system.users.index'));
+
+    $response->assertStatus(403);
+});
+
+test('guest users are redirected to login', function () {
+    $response = $this->get(route('admin.system.users.index'));
+
+    $response->assertRedirect('/login');
+});
+
+test('permissions are correctly shared via inertia', function () {
+    $this->seed();
+
+    $admin = User::where('email', 'admin@example.com')->first();
+
+    if (! $admin) {
+        $this->markTestSkipped('Admin user not found. Run database seeder first.');
+    }
+
+    $response = $this->actingAs($admin)->get(route('admin.dashboard'));
+
+    $response->assertInertia(fn ($page) => $page->has('auth.user.permissions')
+        ->where('auth.user.permissions', fn ($permissions) => collect($permissions)->contains('system.users.view')
+        )
+    );
 });

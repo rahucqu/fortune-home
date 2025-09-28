@@ -3,12 +3,9 @@
 declare(strict_types=1);
 
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-
-uses(RefreshDatabase::class);
 
 test('login screen can be rendered', function () {
-    $response = $this->get('/login');
+    $response = $this->get(route('login'));
 
     $response->assertStatus(200);
 });
@@ -16,19 +13,19 @@ test('login screen can be rendered', function () {
 test('users can authenticate using the login screen', function () {
     $user = User::factory()->create();
 
-    $response = $this->post('/login', [
+    $response = $this->post(route('login.store'), [
         'email' => $user->email,
         'password' => 'password',
     ]);
 
     $this->assertAuthenticated();
-    $response->assertRedirect(route('dashboard', absolute: false));
+    $response->assertRedirect(route('admin.dashboard', absolute: false));
 });
 
 test('users can not authenticate with invalid password', function () {
     $user = User::factory()->create();
 
-    $this->post('/login', [
+    $this->post(route('login.store'), [
         'email' => $user->email,
         'password' => 'wrong-password',
     ]);
@@ -39,8 +36,32 @@ test('users can not authenticate with invalid password', function () {
 test('users can logout', function () {
     $user = User::factory()->create();
 
-    $response = $this->actingAs($user)->post('/logout');
+    $response = $this->actingAs($user)->post(route('logout'));
 
     $this->assertGuest();
-    $response->assertRedirect('/');
+    $response->assertRedirect(route('home'));
+});
+
+test('users are rate limited', function () {
+    $user = User::factory()->create();
+
+    for ($i = 0; $i < 5; $i++) {
+        $this->post(route('login.store'), [
+            'email' => $user->email,
+            'password' => 'wrong-password',
+        ])->assertStatus(302)->assertSessionHasErrors([
+            'email' => 'These credentials do not match our records.',
+        ]);
+    }
+
+    $response = $this->post(route('login.store'), [
+        'email' => $user->email,
+        'password' => 'wrong-password',
+    ]);
+
+    $response->assertSessionHasErrors('email');
+
+    $errors = session('errors');
+
+    $this->assertStringContainsString('Too many login attempts', $errors->first('email'));
 });
