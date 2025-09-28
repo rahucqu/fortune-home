@@ -6,8 +6,8 @@ namespace App\Http\Middleware;
 
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Inertia\Middleware;
-use Tighten\Ziggy\Ziggy;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -40,31 +40,19 @@ class HandleInertiaRequests extends Middleware
     public function share(Request $request): array
     {
         [$message, $author] = str(Inspiring::quotes()->random())->explode('-');
+        $sessions = session()->all();
 
         return [
             ...parent::share($request),
             'name' => config('app.name'),
             'quote' => ['message' => trim($message), 'author' => trim($author)],
             'auth' => [
-                'user' => function () use ($request) {
-                    if (! $user = $request->user()) {
-                        return;
-                    }
-
-                    // Load the current team and roles relationships
-                    $user->load(['currentTeam', 'roles']);
-
-                    return array_merge($user->toArray(), array_filter([
-                        'all_teams' => $user->allTeams()->values(),
-                        'is_admin' => $user->hasRole('admin'),
-                        'roles' => $user->roles->pluck('name'),
-                    ]));
-                },
+                'user' => $request->user() ? [
+                    ...$request->user()->toArray(),
+                    'permissions' => $request->user()->getAllPermissions()->pluck('name'),
+                ] : null,
             ],
-            'ziggy' => fn (): array => [
-                ...(new Ziggy())->toArray(),
-                'location' => $request->url(),
-            ],
+            'flashMessages' => Arr::only($sessions, ['success', 'error', 'warning', 'info']),
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];
     }
