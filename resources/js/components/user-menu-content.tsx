@@ -1,9 +1,13 @@
 import { DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { UserInfo } from '@/components/user-info';
 import { useMobileNavigation } from '@/hooks/use-mobile-navigation';
+import { logout } from '@/routes';
+import { index as favoritesIndex } from '@/routes/admin/favorites';
+import { edit } from '@/routes/admin/settings/profile';
 import { type User } from '@/types';
+import { Can } from '@devwizard/laravel-react-permissions';
 import { Link, router } from '@inertiajs/react';
-import { LogOut, Settings, Shield } from 'lucide-react';
+import { Heart, LogOut, Settings } from 'lucide-react';
 
 interface UserMenuContentProps {
     user: User;
@@ -26,24 +30,26 @@ export function UserMenuContent({ user }: UserMenuContentProps) {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-                {user.is_admin && (
+                <Can permission="favorites.view-own">
                     <DropdownMenuItem asChild>
-                        <Link className="block w-full" href="/admin" as="button" prefetch onClick={cleanup}>
-                            <Shield className="mr-2" />
-                            Admin Panel
+                        <Link className="block w-full cursor-pointer" href={favoritesIndex()} as="button" prefetch onClick={cleanup}>
+                            <Heart className="mr-2" />
+                            My Favorites
                         </Link>
                     </DropdownMenuItem>
-                )}
-                <DropdownMenuItem asChild>
-                    <Link className="block w-full" href={route('profile.edit')} as="button" prefetch onClick={cleanup}>
-                        <Settings className="mr-2" />
-                        Settings
-                    </Link>
-                </DropdownMenuItem>
+                </Can>
+                <Can permission="settings.view">
+                    <DropdownMenuItem asChild>
+                        <Link className="block w-full cursor-pointer" href={edit()} as="button" prefetch onClick={cleanup}>
+                            <Settings className="mr-2" />
+                            Settings
+                        </Link>
+                    </DropdownMenuItem>
+                </Can>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-                <Link className="block w-full" method="post" href={route('logout')} as="button" onClick={handleLogout}>
+                <Link className="block w-full cursor-pointer" href={logout()} as="button" onClick={handleLogout}>
                     <LogOut className="mr-2" />
                     Log out
                 </Link>
