@@ -2,36 +2,47 @@
 
 declare(strict_types=1);
 
-use App\Http\Controllers\TeamController;
+use App\Http\Controllers\Frontend\AgentController;
+use App\Http\Controllers\Frontend\BlogController;
+use App\Http\Controllers\Frontend\ContactController;
+use App\Http\Controllers\Frontend\HomeController;
+use App\Http\Controllers\Frontend\PropertyController;
+use App\Http\Controllers\MessageController;
+use App\Http\Controllers\PropertyTourController;
+use App\Http\Controllers\ReviewController;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
-Route::get('/', function () {
-    return Inertia::render('welcome');
-})->name('home');
+Route::get('/', [HomeController::class, 'index'])->name('home');
 
-Route::middleware(['auth', 'verified', 'restrict-admin'])->group(function () {
-    Route::get('dashboard', function () {
-        return Inertia::render('dashboard');
-    })->name('dashboard');
+Route::get('/agents', [AgentController::class, 'index'])->name('agents');
+Route::get('/agent/{agent_slug}', [AgentController::class, 'show'])->name('agent.show');
+Route::get('/agent/{agent_slug}/properties', [AgentController::class, 'properties'])->name('agent.properties');
 
-    // Teams routes - only create and switch
-    Route::get('teams/create', [TeamController::class, 'create'])->name('teams.create');
-    Route::post('teams', [TeamController::class, 'store'])->name('teams.store');
-    Route::post('teams/{team}/switch', [TeamController::class, 'switch'])->name('teams.switch');
+Route::get('/blog', [BlogController::class, 'index'])->name('blog');
+Route::get('/blog/{post_slug}', [BlogController::class, 'show'])->name('blog.show');
 
-    // Team members and invitations
-    Route::get('teams/members', [TeamController::class, 'members'])->name('teams.members');
-    Route::get('teams/invitations', [TeamController::class, 'invitations'])->name('teams.invitations');
+Route::get('/properties', [PropertyController::class, 'index'])->name('properties');
+Route::get('/property/{property_slug}', [PropertyController::class, 'show'])->name('property.show');
 
-    // Team invitations - invite members
-    Route::get('teams/invite', [TeamController::class, 'invite'])->name('teams.invite');
-    Route::post('teams/invitations', [TeamController::class, 'storeInvitation'])->name('teams.invitations.store');
+Route::get('/contact', [ContactController::class, 'index'])->name('contact');
+Route::post('/contact', [ContactController::class, 'store'])
+    ->middleware(['throttle:3,1'])  // Limit to 3 submissions per minute
+    ->name('contact.store');
 
-    // Team member management
-    Route::delete('teams/members/{user}', [TeamController::class, 'removeMember'])->name('teams.members.destroy');
-    Route::put('teams/members/{user}', [TeamController::class, 'updateMemberRole'])->name('teams.members.update');
+Route::post('/properties/schedule-tour', [PropertyTourController::class, 'store'])
+    ->middleware(['throttle:5,10'])
+    ->name('properties.schedule-tour');
+
+// Review routes
+Route::prefix('review/{morph_type}/{morph_id}')->group(function () {
+    Route::get('/', [ReviewController::class, 'index'])->name('reviews.index');
+    Route::get('/create', [ReviewController::class, 'create'])->name('reviews.create');
+    Route::post('/', [ReviewController::class, 'store'])->name('reviews.store');
 });
 
-require __DIR__ . '/settings.php';
-require __DIR__ . '/auth.php';
+// Message routes - public (for sending messages to agents/properties)
+Route::prefix('message/{morph_type}/{morph_id}')->group(function () {
+    Route::post('/', [MessageController::class, 'store'])->name('messages.store');
+});
+
+require __DIR__.'/auth.php';
