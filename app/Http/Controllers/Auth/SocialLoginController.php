@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\UnlinkSocialAccountRequest;
+use App\Models\SocialAccount;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\InvalidStateException;
 
@@ -54,7 +55,7 @@ class SocialLoginController extends Controller
 
         Auth::login($user, true);
 
-        return redirect()->intended(route('dashboard'));
+        return redirect()->intended(route('admin.dashboard'));
     }
 
     /**
@@ -63,18 +64,32 @@ class SocialLoginController extends Controller
     private function findOrCreateUser(\Laravel\Socialite\Contracts\User $socialUser, string $provider): User
     {
         // First, try to find user by provider ID
-        $existingUser = User::where('provider', $provider)
+        $socialAccount = SocialAccount::where('provider', $provider)
             ->where('provider_id', $socialUser->getId())
+            ->with('user')
             ->first();
 
-        if ($existingUser) {
-            // Update user info in case it changed
-            $existingUser->update([
-                'name' => $socialUser->getName() ?? $existingUser->name,
-                'avatar' => $socialUser->getAvatar() ?? $existingUser->avatar,
+        if ($socialAccount) {
+            // Update auth provider info in case it changed
+            $socialAccount->update([
+                'access_token' => $socialUser->token,
+                'refresh_token' => $socialUser->refreshToken,
+                'expires_at' => $socialUser->expiresIn ? now()->addSeconds($socialUser->expiresIn) : null,
+                'metadata' => [
+                    'name' => $socialUser->getName(),
+                    'email' => $socialUser->getEmail(),
+                    'avatar' => $socialUser->getAvatar(),
+                    'username' => $socialUser->getNickname(),
+                ],
             ]);
 
-            return $existingUser;
+            // Update user info if needed
+            $user = $socialAccount->user;
+            $user->update([
+                'name' => $socialUser->getName() ?? $user->name,
+            ]);
+
+            return $user;
         }
 
         // Try to find user by email
@@ -82,55 +97,84 @@ class SocialLoginController extends Controller
 
         if ($existingUserByEmail) {
             // Link social account to existing user
-            $existingUserByEmail->update([
+            $existingUserByEmail->socialAccounts()->create([
                 'provider' => $provider,
                 'provider_id' => $socialUser->getId(),
-                'avatar' => $socialUser->getAvatar() ?? $existingUserByEmail->avatar,
+                'access_token' => $socialUser->token,
+                'refresh_token' => $socialUser->refreshToken,
+                'expires_at' => $socialUser->expiresIn ? now()->addSeconds($socialUser->expiresIn) : null,
+                'metadata' => [
+                    'name' => $socialUser->getName(),
+                    'email' => $socialUser->getEmail(),
+                    'avatar' => $socialUser->getAvatar(),
+                    'username' => $socialUser->getNickname(),
+                ],
             ]);
+
+            // If user has a password but now has social accounts,
+            // remove password to indicate preference for social login
+            if ($existingUserByEmail->password && $existingUserByEmail->socialAccounts()->count() > 0) {
+                $existingUserByEmail->update(['password' => null]);
+            }
 
             return $existingUserByEmail;
         }
 
         // Create new user
-        return User::create([
+        $user = User::create([
             'name' => $socialUser->getName() ?? 'Unknown User',
             'email' => $socialUser->getEmail(),
-            'provider' => $provider,
-            'provider_id' => $socialUser->getId(),
-            'avatar' => $socialUser->getAvatar(),
-            'password' => Hash::make(Str::random(24)), // Random password for social users
+            'password' => null, // No password for social-only users
             'email_verified_at' => now(), // Social providers verify emails
         ]);
+
+        // Assign default role
+        $user->assignRole('user');
+
+        // Create social account record
+        $user->socialAccounts()->create([
+            'provider' => $provider,
+            'provider_id' => $socialUser->getId(),
+            'access_token' => $socialUser->token,
+            'refresh_token' => $socialUser->refreshToken,
+            'expires_at' => $socialUser->expiresIn ? now()->addSeconds($socialUser->expiresIn) : null,
+            'metadata' => [
+                'name' => $socialUser->getName(),
+                'email' => $socialUser->getEmail(),
+                'avatar' => $socialUser->getAvatar(),
+                'username' => $socialUser->getNickname(),
+            ],
+        ]);
+
+        return $user;
     }
 
     /**
      * Unlink social provider from user account.
      */
-    public function unlink(string $provider): RedirectResponse
+    public function unlink(string $provider, UnlinkSocialAccountRequest $request): RedirectResponse
     {
         $this->validateProvider($provider);
 
         $user = Auth::user();
+        $socialAccount = $user->getProvider($provider);
 
-        if (! $user->isSocialUser() || $user->provider !== $provider) {
+        if (! $socialAccount) {
             return back()->withErrors([
                 'social' => 'No linked account found for this provider.',
             ]);
         }
 
-        // Check if user has a password, if not, prevent unlinking
-        if (! $user->password) {
-            return back()->withErrors([
-                'social' => 'You must set a password before unlinking your social account.',
+        // If user is social only and this is their last account, set password first
+        if ($user->isSocialOnly() && $user->socialAccounts()->count() === 1) {
+            $validated = $request->validated();
+            $user->update([
+                'password' => Hash::make($validated['password']),
             ]);
         }
 
-        $user->update([
-            'provider' => null,
-            'provider_id' => null,
-            'provider_token_expires_at' => null,
-            'provider_refresh_token' => null,
-        ]);
+        // Delete the social account record
+        $socialAccount->delete();
 
         return back()->with('status', 'Social account unlinked successfully.');
     }
