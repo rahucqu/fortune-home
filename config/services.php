@@ -46,31 +46,30 @@ return [
     'google' => [
         'client_id' => env('GOOGLE_CLIENT_ID'),
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
-        'redirect' => env('APP_URL') . '/auth/google/callback',
+        'redirect' => env('APP_URL').'/auth/google/callback',
     ],
 
     'github' => [
         'client_id' => env('GITHUB_CLIENT_ID'),
         'client_secret' => env('GITHUB_CLIENT_SECRET'),
-        'redirect' => env('APP_URL') . '/auth/github/callback',
+        'redirect' => env('APP_URL').'/auth/github/callback',
     ],
 
     'facebook' => [
         'client_id' => env('FACEBOOK_CLIENT_ID'),
         'client_secret' => env('FACEBOOK_CLIENT_SECRET'),
-        'redirect' => env('APP_URL') . '/auth/facebook/callback',
+        'redirect' => env('APP_URL').'/auth/facebook/callback',
     ],
 
     'twitter' => [
         'client_id' => env('TWITTER_CLIENT_ID'),
         'client_secret' => env('TWITTER_CLIENT_SECRET'),
-        'redirect' => env('APP_URL') . '/auth/twitter/callback',
+        'redirect' => env('APP_URL').'/auth/twitter/callback',
     ],
 
     'linkedin' => [
         'client_id' => env('LINKEDIN_CLIENT_ID'),
         'client_secret' => env('LINKEDIN_CLIENT_SECRET'),
-        'redirect' => env('APP_URL') . '/auth/linkedin/callback',
+        'redirect' => env('APP_URL').'/auth/linkedin/callback',
     ],
-
 ];
