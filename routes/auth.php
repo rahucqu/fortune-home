@@ -11,18 +11,21 @@ use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\SocialLoginController;
 use App\Http\Controllers\Auth\VerifyEmailController;
+use App\Http\Controllers\Frontend\PropertyController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
     Route::get('register', [RegisteredUserController::class, 'create'])
         ->name('register');
 
-    Route::post('register', [RegisteredUserController::class, 'store']);
+    Route::post('register', [RegisteredUserController::class, 'store'])
+        ->name('register.store');
 
     Route::get('login', [AuthenticatedSessionController::class, 'create'])
         ->name('login');
 
-    Route::post('login', [AuthenticatedSessionController::class, 'store']);
+    Route::post('login', [AuthenticatedSessionController::class, 'store'])
+        ->name('login.store');
 
     Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
         ->name('password.request');
@@ -62,7 +65,8 @@ Route::middleware('auth')->group(function () {
         ->name('password.confirm');
 
     Route::post('confirm-password', [ConfirmablePasswordController::class, 'store'])
-        ->middleware('throttle:6,1');
+        ->middleware('throttle:6,1')
+        ->name('password.confirm.store');
 
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
         ->name('logout');
@@ -71,4 +75,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('auth/{provider}/unlink', [SocialLoginController::class, 'unlink'])
         ->whereIn('provider', ['google', 'github', 'facebook', 'twitter', 'linkedin'])
         ->name('social.unlink');
+
+    // Property favorite functionality
+    Route::post('properties/{property:slug}/favorite', [PropertyController::class, 'toggleFavorite'])
+        ->name('property.favorite');
 });
