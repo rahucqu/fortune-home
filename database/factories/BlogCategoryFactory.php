@@ -65,7 +65,15 @@ class BlogCategoryFactory extends Factory
         ]);
     }
 
-   
+    /**
+     * Create an inactive category.
+     */
+    public function inactive(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_active' => false,
+        ]);
+    }
 
     /**
      * Create a category with specific sort order.
