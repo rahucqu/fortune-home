@@ -66,4 +66,14 @@ class BlogCategoryFactory extends Factory
     }
 
    
+
+    /**
+     * Create a category with specific sort order.
+     */
+    public function sortOrder(int $order): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'sort_order' => $order,
+        ]);
+    }
 }
