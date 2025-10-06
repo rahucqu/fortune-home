@@ -89,6 +89,19 @@ class BlogPost extends Model
             }
         });
 
+        
+        static::updating(function ($post) {
+            if ($post->isDirty('title') && empty($post->slug)) {
+                $post->slug = Str::slug($post->title);
+            }
+
+            // Set published_at when status changes to published
+            if ($post->isDirty('status') && $post->status === 'published' && ! $post->published_at) {
+                $post->published_at = now();
+            }
+        });
+    }
+
     /**
      * Get the author of the blog post.
      */
